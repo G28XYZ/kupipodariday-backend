@@ -1,4 +1,4 @@
-import { IsUrl, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsUrl, Length, MinLength } from 'class-validator';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
@@ -22,26 +22,32 @@ export class User {
   updatedAt: Date;
 
   /** имя пользователя, уникальная строка от 2 до 30 символов, обязательное поле. */
-  @Column()
+  @Column({
+    unique: true,
+  })
+  @Length(2, 30)
   username: string;
 
   /** about — **информация о пользователе, строка от 2 до 200 символов. В качестве значения по умолчанию укажите для него строку: «Пока ничего не рассказал о себе». */
   @Column()
-  @MinLength(2)
-  @MaxLength(200)
-  about: string;
+  @Length(2, 200)
+  about?: string;
 
   /** avatar — ссылка на аватар. В качестве значения по умолчанию задайте https://i.pravatar.cc/300 */
   @Column({ default: 'https://i.pravatar.cc/300' })
   @IsUrl()
-  avatar: string;
+  avatar?: string;
 
   /** email — адрес электронной почты пользователя, должен быть уникален. */
   @Column()
+  @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   /** password — пароль пользователя, строка. */
   @Column()
+  @IsNotEmpty()
+  @MinLength(5)
   password: string;
 
   /** wishes — список желаемых подарков. Используйте для него соответствующий тип связи. */
