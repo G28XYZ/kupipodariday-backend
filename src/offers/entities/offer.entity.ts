@@ -1,7 +1,9 @@
-import { Column } from 'typeorm';
+import { Column, PrimaryGeneratedColumn } from 'typeorm';
 
 /** Схема желающих скинуться (offer): */
 export class Offer {
+  @PrimaryGeneratedColumn()
+  id: number;
   /** user содержит id желающего скинуться; */
   @Column()
   user: string;

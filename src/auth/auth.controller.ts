@@ -24,7 +24,7 @@ export class AuthController {
   @HttpCode(201) // TODO - const
   async signUp(@Body() createUserDto: CreateUserDto) {
     if (await this.userService.findOne(createUserDto.username)) {
-      throw new BadRequestException('SIGIN_ERROR');
+      throw new BadRequestException('Пользователь с таким именем существует'); // TODO - const
     }
     return this.authService.register(createUserDto);
   }

@@ -1,11 +1,13 @@
 import { IsUrl, MaxLength, MinLength } from 'class-validator';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 // TODO - перенести числа и текст в константы
 
 /** Схема для подарков (wish) */
 @Entity()
 export class Wish {
+  @PrimaryGeneratedColumn()
+  id: number;
   /** name — название подарка. Не может быть длиннее 250 символов и короче одного. */
   @Column()
   @MinLength(1)
@@ -40,9 +42,8 @@ export class Wish {
   description: string;
 
   /** offers — массив ссылок на заявки скинуться от других пользователей. */
-  @Column()
-  @IsUrl()
-  offers: string[];
+  // @Column()
+  // offers: string[];
 
   /** copied — содержит cчётчик тех, кто скопировал подарок себе. Целое десятичное число. */
   @Column()

@@ -14,11 +14,11 @@ export class User {
   id: number;
 
   /** createdAt — дата создания, тип значения Date; */
-  @Column()
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   /** updatedAt — дата изменения, тип значения Date. */
-  @Column()
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
   /** имя пользователя, уникальная строка от 2 до 30 символов, обязательное поле. */
@@ -29,7 +29,7 @@ export class User {
   username: string;
 
   /** about — **информация о пользователе, строка от 2 до 200 символов. В качестве значения по умолчанию укажите для него строку: «Пока ничего не рассказал о себе». */
-  @Column()
+  @Column({ default: '' })
   @Length(2, 200)
   about?: string;
 
@@ -45,20 +45,20 @@ export class User {
   email: string;
 
   /** password — пароль пользователя, строка. */
-  @Column()
+  @Column({ select: false })
   @IsNotEmpty()
   @MinLength(5)
   password: string;
 
   /** wishes — список желаемых подарков. Используйте для него соответствующий тип связи. */
-  @JoinColumn()
-  wishes: Wish;
+  // @JoinColumn()
+  // wishes: Wish;
 
-  /** offers — содержит список подарков, на которые скидывается пользователь. Установите для него подходящий тип связи. */
-  @JoinColumn()
-  offers: Offer;
+  // /** offers — содержит список подарков, на которые скидывается пользователь. Установите для него подходящий тип связи. */
+  // @JoinColumn()
+  // offers: Offer;
 
-  /** wishlists содержит список вишлистов, которые создал пользователь. Установите для него подходящий тип связи. */
-  @JoinColumn()
-  wishlist: Wishlist;
+  // /** wishlists содержит список вишлистов, которые создал пользователь. Установите для него подходящий тип связи. */
+  // @JoinColumn()
+  // wishlist: Wishlist;
 }

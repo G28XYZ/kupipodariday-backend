@@ -9,8 +9,9 @@ import { WishlistsModule } from './wishlists/wishlists.module';
 import { OffersModule } from './offers/offers.module';
 import { AuthModule } from './auth/auth.module';
 
-import configuration, { ormConfig } from './config';
+import configuration, { ConfigurationService, ormConfig } from './config';
 import { AuthMiddleware } from './auth/middlewares/auth-middleware';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { AuthMiddleware } from './auth/middlewares/auth-middleware';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [JwtService, ConfigurationService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

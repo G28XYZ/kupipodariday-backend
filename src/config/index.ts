@@ -2,8 +2,8 @@ import { ConfigService } from '@nestjs/config';
 import { TConfiguration } from 'src/types';
 
 export class ConfigurationService extends ConfigService<TConfiguration> {
-  constructor() {
-    super();
+  constructor(internalConfig?: Record<string, any>) {
+    super(internalConfig);
   }
 }
 
