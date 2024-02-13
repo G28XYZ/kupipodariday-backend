@@ -1,4 +1,12 @@
-import { IsEmail, IsNotEmpty, IsUrl, Length, MinLength } from 'class-validator';
+import { Exclude } from 'class-transformer';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsUrl,
+  Length,
+  MinLength,
+} from 'class-validator';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
@@ -29,13 +37,15 @@ export class User {
   username: string;
 
   /** about — **информация о пользователе, строка от 2 до 200 символов. В качестве значения по умолчанию укажите для него строку: «Пока ничего не рассказал о себе». */
-  @Column({ default: '' })
+  @Column({ default: 'Пока ничего не рассказал о себе' })
   @Length(2, 200)
+  @IsOptional()
   about?: string;
 
   /** avatar — ссылка на аватар. В качестве значения по умолчанию задайте https://i.pravatar.cc/300 */
   @Column({ default: 'https://i.pravatar.cc/300' })
   @IsUrl()
+  @IsOptional()
   avatar?: string;
 
   /** email — адрес электронной почты пользователя, должен быть уникален. */

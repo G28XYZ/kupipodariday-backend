@@ -19,9 +19,9 @@ export class AuthController {
     private readonly userService: UsersService,
   ) {}
 
-  @UsePipes(new ValidationPipe())
   @Post('signup')
   @HttpCode(201) // TODO - const
+  @UsePipes(new ValidationPipe())
   async signUp(@Body() createUserDto: CreateUserDto) {
     if (await this.userService.findOne(createUserDto.username)) {
       throw new BadRequestException('Пользователь с таким именем существует'); // TODO - const
