@@ -15,8 +15,8 @@ export class UsersService {
     return this.userRepository.save(createUserDto);
   }
 
-  findOne(username: string) {
-    return this.userRepository.findOne({ where: { username } });
+  findOne(username: string, select: (keyof User)[] = []) {
+    return this.userRepository.findOne({ where: { username }, select });
   }
 
   findById(id: number) {

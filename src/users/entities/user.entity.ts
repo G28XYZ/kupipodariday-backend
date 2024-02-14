@@ -1,3 +1,4 @@
+import { genSalt, hash } from 'bcrypt';
 import { Exclude } from 'class-transformer';
 import {
   IsEmail,
@@ -10,7 +11,14 @@ import {
 import { Offer } from 'src/offers/entities/offer.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
-import { Column, Entity, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  JoinColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 // TODO - перенести числа и текст в константы
 
