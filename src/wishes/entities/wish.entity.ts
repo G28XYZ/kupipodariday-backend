@@ -49,8 +49,8 @@ export class Wish {
   description: string;
 
   /** offers — массив ссылок на заявки скинуться от других пользователей. */
-  // @Column()
-  // offers: string[];
+  @Column()
+  offers: string[];
 
   /** copied — содержит cчётчик тех, кто скопировал подарок себе. Целое десятичное число. */
   @Column()
