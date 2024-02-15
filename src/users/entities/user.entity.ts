@@ -17,6 +17,8 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -69,14 +71,14 @@ export class User {
   password: string;
 
   /** wishes — список желаемых подарков. Используйте для него соответствующий тип связи. */
-  // @JoinColumn()
-  // wishes: Wish;
+  @OneToMany(() => Wish, (wish) => wish.name)
+  wishes: Wish[];
 
   // /** offers — содержит список подарков, на которые скидывается пользователь. Установите для него подходящий тип связи. */
-  // @JoinColumn()
-  // offers: Offer;
+  @ManyToMany(() => Offer, (offer) => offer.user)
+  offers: Offer;
 
   // /** wishlists содержит список вишлистов, которые создал пользователь. Установите для него подходящий тип связи. */
-  // @JoinColumn()
-  // wishlist: Wishlist;
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.name)
+  wishlists: Wishlist;
 }

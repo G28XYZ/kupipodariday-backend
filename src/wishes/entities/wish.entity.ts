@@ -1,5 +1,12 @@
 import { IsUrl, MaxLength, MinLength } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 // TODO - перенести числа и текст в константы
 
@@ -32,7 +39,7 @@ export class Wish {
   raised: number;
 
   /** owner — ссылка на пользователя, который добавил пожелание подарка. */
-  @Column()
+  @ManyToOne(() => User, (user) => user.username)
   owner: string;
 
   /** description — строка с описанием подарка длиной от 1 и до 1024 символов. */
