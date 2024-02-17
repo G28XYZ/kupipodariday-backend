@@ -1,6 +1,16 @@
 import { IsUrl, Length, MaxLength, MinLength } from 'class-validator';
+import { Offer } from 'src/offers/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 // TODO - перенести числа и текст в константы
 
@@ -15,9 +25,8 @@ export class Wish {
   @MaxLength(250)
   name: string;
   /** link — ссылка на интернет-магазин, в котором можно приобрести подарок, строка. */
-  @Column()
   @IsUrl()
-  link: string;
+  link: Wishlist;
   /** image ссылка на изображение подарка, строка. Должна быть валидным URL. */
   @Column()
   @IsUrl()
@@ -36,8 +45,9 @@ export class Wish {
   @Length(1, 1024)
   description: string;
   /** offers — массив ссылок на заявки скинуться от других пользователей. */
-  @ManyToOne(() => User, (user) => user.offers)
-  offers: User[];
+  // @OneToMany(() => Offer, (offer) => offer.item)
+  // @JoinTable()
+  // offers: Offer[];
   /** copied — содержит cчётчик тех, кто скопировал подарок себе. Целое десятичное число. */
   @Column()
   copied: number;

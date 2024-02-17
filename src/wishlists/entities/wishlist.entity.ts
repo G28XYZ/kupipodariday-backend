@@ -1,5 +1,12 @@
 import { MaxLength, MinLength } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Wish } from 'src/wishes/entities/wish.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 // TODO - перенести числа и текст в константы
 
@@ -23,6 +30,7 @@ export class Wishlist {
   image: string;
 
   /** items содержит набор ссылок на подарки. */
-  // @Column()
-  // items: string[];
+  @ManyToMany(() => Wish)
+  @JoinColumn()
+  items: Wish[];
 }

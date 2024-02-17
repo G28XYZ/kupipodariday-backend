@@ -1,5 +1,5 @@
+import { genSalt, hash } from 'bcrypt';
 import {
-  Contains,
   IsEmail,
   IsNotEmpty,
   IsOptional,
@@ -10,7 +10,14 @@ import {
 } from 'class-validator';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 // TODO - перенести числа и текст в константы
 
@@ -57,9 +64,17 @@ export class User {
   @OneToMany(() => Wish, (wish) => wish.name)
   wishes: Wish[];
   // /** offers — содержит список подарков, на которые скидывается пользователь. Установите для него подходящий тип связи. */
-  @OneToMany(() => Wish, (wish) => wish.offers)
+  @OneToMany(() => Wish, (wish) => wish.name)
   offers: Wish[];
   // /** wishlists содержит список вишлистов, которые создал пользователь. Установите для него подходящий тип связи. */
   @OneToMany(() => Wishlist, (wishlist) => wishlist.name)
   wishlists: Wishlist;
+  /**  */
+  @BeforeInsert()
+  @BeforeUpdate()
+  async _handleHashPassword() {
+    if (this.password) {
+      this.password = await hash(this.password, await genSalt(10));
+    }
+  }
 }

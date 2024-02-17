@@ -2,10 +2,10 @@ import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 import { ConstructorType, TRequest, TSessionRequest } from 'src/types';
 
 export const GetReqParam = <
-  T extends ConstructorType,
-  K extends keyof InstanceType<T>,
+  T extends keyof TSessionRequest,
+  K extends keyof TSessionRequest[T],
 >(
-  param: keyof TSessionRequest,
+  param: T,
   field?: K,
 ) => {
   const paramDecorator = createParamDecorator(

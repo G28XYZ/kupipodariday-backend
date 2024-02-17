@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   Post,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -46,13 +47,19 @@ export class UsersController {
     return this.usersService.findByName(username);
   }
 
-  @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() user: UpdateUserDto) {
-    return this.usersService.updateOne(id, user);
+  @Patch('me')
+  async update(
+    @GetReqParam('user', 'id') id: number,
+    @Body() userData: UpdateUserDto,
+  ) {
+    if (!id?.toString()) throw new NotFoundException();
+    return this.usersService.updateOne(id, userData);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    const user = await this.usersService.findById(id);
+    if (!user) throw new NotFoundException();
     return this.usersService.removeOne(id);
   }
 

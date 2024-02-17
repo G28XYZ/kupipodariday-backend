@@ -1,16 +1,16 @@
 import { User } from 'src/users/entities/user.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
-import { Column, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 /** Схема желающих скинуться (offer): */
 export class Offer {
   @PrimaryGeneratedColumn()
   id: number;
   /** user содержит id желающего скинуться; */
-  @OneToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   user: User;
   /** item содержит ссылку на товар; */
-  @OneToMany(() => Wish, (wish) => wish.name)
+  @ManyToOne(() => Wish, (wish) => wish.name)
   item: Wish;
   /** amount — сумма заявки, округляется до двух знаков после запятой; */
   @Column()

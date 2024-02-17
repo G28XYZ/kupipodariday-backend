@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
@@ -11,15 +12,19 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
+  private _genUser(user: Partial<User>) {
+    return plainToInstance(User, user);
+  }
+
   create(createUserDto: CreateUserDto): Promise<User> {
-    return this.userRepository.save(createUserDto);
+    return this.userRepository.save(this._genUser(createUserDto));
   }
 
   findUsersByQuerySearch(searchText: string) {
     return this.userRepository
       .createQueryBuilder('User')
       .where('User.username like :name', { name: '%' + searchText + '%' })
-      .orderBy('User.id', 'DESC')
+      .orderBy('User.id', 'ASC')
       .getMany();
   }
 
@@ -39,8 +44,8 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  updateOne(id: number, updateUserDto: UpdateUserDto) {
-    return this.userRepository.update({ id }, updateUserDto);
+  async updateOne(id: number, updateUserDto: UpdateUserDto) {
+    return this.userRepository.update({ id }, this._genUser(updateUserDto));
   }
 
   removeOne(id: number) {

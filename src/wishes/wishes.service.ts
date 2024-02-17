@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Wish } from './entities/wish.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class WishesService {
+  constructor(
+    @InjectRepository(Wish) private readonly userRepository: Repository<Wish>,
+  ) {}
+
   create(createWishDto: CreateWishDto) {
-    return 'This action adds a new wish';
+    return this.userRepository.save(createWishDto);
   }
 
   findAll() {
