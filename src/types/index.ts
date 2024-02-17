@@ -21,3 +21,11 @@ export type TController = (
 ) => Promise<any> | any;
 
 export type TControllerParameters = Parameters<TController>;
+
+export type TRequest = Parameters<TController>[0];
+
+export type TResponse = Parameters<TController>[1];
+
+export type TNext = Parameters<TController>[2];
+
+export type ConstructorType<T = any> = new (...args: any[]) => T;

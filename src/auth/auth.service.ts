@@ -24,7 +24,7 @@ export class AuthService {
 
   async generateToken(userId: number) {
     return {
-      token: await this.jwtService.signAsync(
+      access_token: await this.jwtService.signAsync(
         { id: userId },
         { secret: this.configService.get('jwtSecret') },
       ),
