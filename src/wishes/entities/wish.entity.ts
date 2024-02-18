@@ -2,7 +2,6 @@ import { IsUrl, Length, Min } from 'class-validator';
 import { PrimaryEntityFields } from 'src/common/primary-entity-fields';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 // TODO - перенести числа и текст в константы
@@ -16,7 +15,7 @@ export class Wish extends PrimaryEntityFields {
   name: string;
   /** link — ссылка на интернет-магазин, в котором можно приобрести подарок, строка. */
   @IsUrl()
-  link: Wishlist;
+  link: string;
   /** image ссылка на изображение подарка, строка. Должна быть валидным URL. */
   @Column()
   @IsUrl()

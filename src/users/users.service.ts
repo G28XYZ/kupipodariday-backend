@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { Wish } from 'src/wishes/entities/wish.entity';
+import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 
 @Injectable()
 export class UsersService {
@@ -23,16 +24,20 @@ export class UsersService {
 
   findUsersByQuerySearch(searchText: string) {
     searchText = '%' + searchText + '%';
-    return this.userRepository
-      .createQueryBuilder('User')
-      .where('User.username like :name', { name: searchText })
-      .orWhere('User.email like :email', { email: searchText })
-      .orderBy('User.id', 'ASC')
-      .getMany();
+    return this.userRepository.find({
+      where: [{ username: Like(searchText) }, { email: Like(searchText) }],
+      order: { createdAt: 'ASC' },
+    });
   }
 
   saveUser(user: Partial<User>) {
     return this.userRepository.save(this._genUser(user));
+  }
+
+  async addWishlist(userId: number, wishlist: Wishlist) {
+    const user = await this.findWishlists(userId);
+    user.wishlists.push(wishlist);
+    return this.userRepository.save(user);
   }
 
   findOneWithSelect(username: string, select: (keyof User)[] = []) {
@@ -63,6 +68,13 @@ export class UsersService {
     return this.userRepository.findOne({
       where: { id },
       relations: ['wishes'],
+    });
+  }
+
+  findWishlists(id: number) {
+    return this.userRepository.findOne({
+      where: { id },
+      relations: ['wishlists'],
     });
   }
 

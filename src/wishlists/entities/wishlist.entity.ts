@@ -1,7 +1,7 @@
 import { IsOptional, IsUrl, Length, MaxLength } from 'class-validator';
 import { PrimaryEntityFields } from 'src/common/primary-entity-fields';
 import { Wish } from 'src/wishes/entities/wish.entity';
-import { Column, Entity, JoinColumn, ManyToMany } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 // TODO - перенести числа и текст в константы
 
@@ -13,7 +13,7 @@ export class Wishlist extends PrimaryEntityFields {
   @Length(1, 250)
   name: string;
   /** description — описание подборки, строка до 1500 символов; */
-  @Column()
+  @Column({ default: '' })
   @MaxLength(1500)
   @IsOptional()
   description: string;
@@ -22,7 +22,6 @@ export class Wishlist extends PrimaryEntityFields {
   @IsUrl()
   image: string;
   /** items содержит набор ссылок на подарки. */
-  @ManyToMany(() => Wish)
-  @JoinColumn()
+  @OneToMany(() => Wish, (wish) => wish.owner)
   items: Wish[];
 }

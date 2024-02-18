@@ -3,14 +3,11 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   ParseIntPipe,
 } from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
-import { UpdateWishDto } from './dto/update-wish.dto';
 import { GetReqParam } from 'src/utils/get-req-param';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -36,7 +33,7 @@ export class WishesController {
     @Param('id', ParseIntPipe) wishId: number,
   ) {
     const wish = await this.wishesService.findCopingWish(userId, wishId);
-    this.usersService.copyWish(userId, wish);
+    await this.usersService.copyWish(userId, wish);
     return wish;
   }
 
@@ -50,13 +47,8 @@ export class WishesController {
     return this.wishesService.findTop20();
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.wishesService.findAll();
-  // }
-
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.wishesService.findOne(id);
+    return this.wishesService.findOneById(id);
   }
 }

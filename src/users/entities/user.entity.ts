@@ -12,7 +12,15 @@ import { PrimaryEntityFields } from 'src/common/primary-entity-fields';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+} from 'typeorm';
 
 // TODO - перенести числа и текст в константы
 
@@ -51,7 +59,8 @@ export class User extends PrimaryEntityFields {
   @OneToMany(() => Offer, (offer) => offer.user)
   offers: Offer[];
   /** wishlists содержит список вишлистов, которые создал пользователь. Установите для него подходящий тип связи. */
-  @OneToMany(() => Wishlist, (wishlist) => wishlist.name)
+  @ManyToMany(() => Wishlist)
+  @JoinTable()
   wishlists: Wishlist[];
   /** хэшировать пароль перед созданием/обновлением в базе */
   @BeforeInsert()

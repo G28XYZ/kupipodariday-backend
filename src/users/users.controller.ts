@@ -31,9 +31,14 @@ export class UsersController {
     return user;
   }
 
-  @Get('me/wishes')
-  async getUserWishes(@GetReqParam('user', 'id') id: number) {
-    const user = await this.usersService.findWishes(id);
+  @Get(':username/wishes')
+  async getUserWishes(
+    @Param('username') name: string,
+    @GetReqParam('user', 'id') id: number,
+  ) {
+    const userId =
+      name === 'me' ? id : (await this.usersService.findByName(name)).id;
+    const user = await this.usersService.findWishes(userId);
     if (user.wishes) {
       return user.wishes;
     }

@@ -4,13 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateWishDto } from './dto/create-wish.dto';
-import { UpdateWishDto } from './dto/update-wish.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './entities/wish.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
-import { User } from 'src/users/entities/user.entity';
-import { from, map } from 'rxjs';
 
 @Injectable()
 export class WishesService {
@@ -41,15 +38,22 @@ export class WishesService {
     });
   }
 
-  findOne(id: number, options?: FindOneOptions<Wish>) {
+  findOneById(id: number) {
+    return this.wishRepository.findOneBy({ id });
+  }
+
+  findOneWithOptions(id: number, options?: FindOneOptions<Wish>) {
     return this.wishRepository.findOne({ where: { id }, ...options });
   }
 
   async findCopingWish(userId: number, wishId: number) {
-    const wish = await this.findOne(wishId, { relations: ['owner'] });
+    const wish = await this.findOneWithOptions(wishId, {
+      relations: ['owner'],
+    });
     if (!wish.owner.id) throw new NotFoundException('Подарок не найден');
     if (wish.owner.id === userId)
       throw new BadRequestException('Нельзя скопировать свой подарок');
-    return wish;
+    ++wish.copied;
+    return await this.wishRepository.save(wish);
   }
 }

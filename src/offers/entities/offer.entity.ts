@@ -7,10 +7,10 @@ import { Column, Entity, ManyToOne } from 'typeorm';
 @Entity()
 export class Offer extends PrimaryEntityFields {
   /** user содержит id желающего скинуться; */
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.offers)
   user: User;
   /** item содержит ссылку на товар; */
-  @ManyToOne(() => Wish, (wish) => wish.name)
+  @ManyToOne(() => Wish, (wish) => wish.offers)
   item: Wish;
   /** amount — сумма заявки, округляется до двух знаков после запятой; */
   @Column()
