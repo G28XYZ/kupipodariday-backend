@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
-import { compare, genSalt, hash } from 'bcrypt';
+import { compare } from 'bcrypt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ConfigurationService } from 'src/config';
@@ -16,7 +16,7 @@ export class AuthService {
 
   async register(createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
-    return this.generateToken(user.id);
+    return await this.generateToken(user.id);
   }
 
   async generateToken(userId: number) {
@@ -30,6 +30,7 @@ export class AuthService {
 
   async login({ username, password }: LoginUserDto) {
     const user = await this.userService.findOne(username, ['password', 'id']);
+    console.log(user);
     if (!user) {
       throw new UnauthorizedException('NOT_FOUND_ERROR'); // TODO - const err
     }
@@ -37,6 +38,6 @@ export class AuthService {
     if (isComparePassword === false) {
       throw new UnauthorizedException('PASSWORD_ERROR'); // TODO - const err
     }
-    return this.generateToken(user.id);
+    return await this.generateToken(user.id);
   }
 }

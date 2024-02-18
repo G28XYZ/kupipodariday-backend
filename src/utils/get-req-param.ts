@@ -1,23 +1,26 @@
 import { ExecutionContext, createParamDecorator } from '@nestjs/common';
-import { ConstructorType, TRequest, TSessionRequest } from 'src/types';
+import { TRequest, TSessionRequest } from 'src/types';
 
 export const GetReqParam = <
-  T extends keyof TSessionRequest,
-  K extends keyof TSessionRequest[T],
+  P extends keyof TSessionRequest,
+  F extends keyof TSessionRequest[P],
 >(
-  param: T,
-  field?: K,
+  param: P,
+  field?: F,
 ) => {
-  const paramDecorator = createParamDecorator(
-    (data = field, ctx: ExecutionContext) => {
+  const paramDecorator = createParamDecorator<TSessionRequest>(
+    (
+      _,
+      ctx: ExecutionContext,
+    ): TSessionRequest[P] | TSessionRequest[P][F] | null => {
       const request = ctx.switchToHttp().getRequest<TRequest>();
 
       if (!request?.[param]) {
         return null;
       }
 
-      if (data) {
-        return request?.[param]?.[data];
+      if (field) {
+        return request?.[param]?.[field];
       }
 
       return request?.[param];

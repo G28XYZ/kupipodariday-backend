@@ -16,11 +16,15 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
 import { GetReqParam } from 'src/utils/get-req-param';
+import { WishesService } from 'src/wishes/wishes.service';
 
 @Controller('users')
 @UseGuards(AuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly wishesService: WishesService,
+  ) {}
 
   @Get('me')
   me(@GetReqParam('user') user: User) {
@@ -28,8 +32,8 @@ export class UsersController {
   }
 
   @Get('me/wishes')
-  getWishes() {
-    return [];
+  getWishes(@GetReqParam('user') user: User) {
+    return this.wishesService.findByUser(user);
   }
 
   @Get('find')

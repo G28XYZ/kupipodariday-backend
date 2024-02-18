@@ -7,4 +7,5 @@ export class CreateWishDto extends PickType(Wish, [
   'image',
   'description',
   'price',
+  'owner',
 ]) {}

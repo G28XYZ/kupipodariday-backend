@@ -17,15 +17,23 @@ export class UsersService {
   }
 
   create(createUserDto: CreateUserDto): Promise<User> {
-    return this.userRepository.save(this._genUser(createUserDto));
+    return this.saveUser(createUserDto);
   }
 
   findUsersByQuerySearch(searchText: string) {
+    searchText = '%' + searchText + '%';
     return this.userRepository
       .createQueryBuilder('User')
-      .where('User.username like :name', { name: '%' + searchText + '%' })
+      .where('User.username like :name', { name: searchText })
+      .orWhere('User.email like :email', { email: searchText })
       .orderBy('User.id', 'ASC')
       .getMany();
+  }
+
+  async saveUser(user: Partial<User>) {
+    const u = await this.userRepository.save(this._genUser(user));
+    console.log(u);
+    return u;
   }
 
   findOne(username: string, select: (keyof User)[] = []) {
