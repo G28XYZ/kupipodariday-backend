@@ -13,17 +13,31 @@ import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { GetReqParam } from 'src/utils/get-req-param';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('wishes')
 export class WishesController {
-  constructor(private readonly wishesService: WishesService) {}
+  constructor(
+    private readonly wishesService: WishesService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Post()
-  async create(
+  create(
     @GetReqParam('user') user: User,
     @Body() createWishDto: CreateWishDto,
   ) {
     return this.wishesService.create({ ...createWishDto, owner: user });
+  }
+
+  @Post(':id/copy')
+  async copyWish(
+    @GetReqParam('user', 'id') userId: number,
+    @Param('id', ParseIntPipe) wishId: number,
+  ) {
+    const wish = await this.wishesService.findCopingWish(userId, wishId);
+    this.usersService.copyWish(userId, wish);
+    return wish;
   }
 
   @Get('last')
@@ -44,18 +58,5 @@ export class WishesController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.wishesService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateWishDto: UpdateWishDto,
-  ) {
-    return this.wishesService.update(id, updateWishDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.wishesService.remove(id);
   }
 }

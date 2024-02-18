@@ -32,13 +32,17 @@ export class UsersController {
   }
 
   @Get('me/wishes')
-  getWishes(@GetReqParam('user') user: User) {
-    return this.wishesService.findByUser(user);
+  async getUserWishes(@GetReqParam('user', 'id') id: number) {
+    const user = await this.usersService.findWishes(id);
+    if (user.wishes) {
+      return user.wishes;
+    }
+    throw new NotFoundException('Подарки не найдены');
   }
 
   @Get('find')
-  findUserByQuerySearch(@Query() { query }: { query: string }) {
-    return this.usersService.findUsersByQuerySearch(query);
+  findUserByQuerySearch(@Query('query') searchQuery: string) {
+    return this.usersService.findUsersByQuerySearch(searchQuery);
   }
 
   @Get()
@@ -68,7 +72,7 @@ export class UsersController {
   }
 
   @Post('find')
-  _findUserByQuerySearch(@Body() query: { query: string }) {
+  _findUserByQuerySearch(@Body('query') query: string) {
     return this.findUserByQuerySearch(query);
   }
 }

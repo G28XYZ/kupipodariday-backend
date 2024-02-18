@@ -1,4 +1,4 @@
-import { IsUrl, Length, MaxLength, MinLength } from 'class-validator';
+import { IsUrl, Length, Min } from 'class-validator';
 import { PrimaryEntityFields } from 'src/common/primary-entity-fields';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -12,8 +12,7 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 export class Wish extends PrimaryEntityFields {
   /** name — название подарка. Не может быть длиннее 250 символов и короче одного. */
   @Column()
-  @MinLength(1)
-  @MaxLength(250)
+  @Length(1, 250)
   name: string;
   /** link — ссылка на интернет-магазин, в котором можно приобрести подарок, строка. */
   @IsUrl()
@@ -23,10 +22,11 @@ export class Wish extends PrimaryEntityFields {
   @IsUrl()
   image: string;
   /** price — стоимость подарка, с округлением до сотых, число. */
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Min(1, { message: 'Минимальное значение цены 1 руб' })
   price: number;
   /** raised — сумма предварительного сбора или сумма, которую пользователи сейчас готовы скинуть на подарок. Также округляется до сотых. */
-  @Column({ default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   raised: number;
   /** owner — ссылка на пользователя, который добавил пожелание подарка. */
   @ManyToOne(() => User, (user) => user.wishes)

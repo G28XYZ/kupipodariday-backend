@@ -29,7 +29,10 @@ export class AuthService {
   }
 
   async login({ username, password }: LoginUserDto) {
-    const user = await this.userService.findOne(username, ['password', 'id']);
+    const user = await this.userService.findOneWithSelect(username, [
+      'password',
+      'id',
+    ]);
     console.log(user);
     if (!user) {
       throw new UnauthorizedException('NOT_FOUND_ERROR'); // TODO - const err

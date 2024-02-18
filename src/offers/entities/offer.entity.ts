@@ -1,7 +1,7 @@
 import { PrimaryEntityFields } from 'src/common/primary-entity-fields';
 import { User } from 'src/users/entities/user.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 /** Схема желающих скинуться (offer): */
 @Entity()

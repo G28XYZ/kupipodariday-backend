@@ -20,7 +20,7 @@ export class AuthController {
   @Post('signup')
   @HttpCode(201) // TODO - const
   async signUp(@Body() createUserDto: CreateUserDto) {
-    if (await this.userService.findOne(createUserDto.username)) {
+    if (await this.userService.findByName(createUserDto.username)) {
       throw new BadRequestException('Пользователь с таким именем существует'); // TODO - const
     }
     return this.authService.register(createUserDto);

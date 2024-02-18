@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './entities/wish.entity';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { User } from 'src/users/entities/user.entity';
+import { from, map } from 'rxjs';
 
 @Injectable()
 export class WishesService {
@@ -29,23 +34,22 @@ export class WishesService {
     return this.wishRepository.find({ order: { copied: 'DESC' }, take: 20 });
   }
 
-  findByUser(owner: User) {
-    console.log('[findByUser]', owner);
+  findByUserId(id: number) {
     return this.wishRepository.find({
-      where: { owner: { id: owner.id } },
+      where: { owner: { id } },
       relations: ['owner'],
     });
   }
 
-  findOne(id: number) {
-    return this.wishRepository.findOneBy({ id });
+  findOne(id: number, options?: FindOneOptions<Wish>) {
+    return this.wishRepository.findOne({ where: { id }, ...options });
   }
 
-  update(id: number, updateWishDto: UpdateWishDto) {
-    return `This action updates a #${id} wish`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} wish`;
+  async findCopingWish(userId: number, wishId: number) {
+    const wish = await this.findOne(wishId, { relations: ['owner'] });
+    if (!wish.owner.id) throw new NotFoundException('Подарок не найден');
+    if (wish.owner.id === userId)
+      throw new BadRequestException('Нельзя скопировать свой подарок');
+    return wish;
   }
 }

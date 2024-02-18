@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
+import { Wish } from 'src/wishes/entities/wish.entity';
 
 @Injectable()
 export class UsersService {
@@ -30,13 +31,11 @@ export class UsersService {
       .getMany();
   }
 
-  async saveUser(user: Partial<User>) {
-    const u = await this.userRepository.save(this._genUser(user));
-    console.log(u);
-    return u;
+  saveUser(user: Partial<User>) {
+    return this.userRepository.save(this._genUser(user));
   }
 
-  findOne(username: string, select: (keyof User)[] = []) {
+  findOneWithSelect(username: string, select: (keyof User)[] = []) {
     return this.userRepository.findOne({ where: { username }, select });
   }
 
@@ -58,5 +57,18 @@ export class UsersService {
 
   removeOne(id: number) {
     return this.userRepository.delete({ id });
+  }
+
+  findWishes(id: number) {
+    return this.userRepository.findOne({
+      where: { id },
+      relations: ['wishes'],
+    });
+  }
+
+  async copyWish(userId: number, wish: Wish) {
+    const user = await this.findWishes(userId);
+    user.wishes.push(wish);
+    return this.userRepository.save(user);
   }
 }
