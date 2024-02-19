@@ -29,7 +29,21 @@ export class OffersController {
   ) {
     const item = await this.wishesService.findOneById(createOfferDto.itemId);
     if (!item) throw new NotFoundException('Подарок не найден');
-    return this.offersService.create({ ...createOfferDto, user, item });
+
+    const offer = await this.offersService.create({
+      ...createOfferDto,
+      user,
+      item,
+    });
+
+    // console.log(
+    //   this.wishesService.factory('findOneWithOptions', [
+    //     item.id,
+    //     { relations: ['offers'] },
+    //   ]).value,
+    // );
+
+    return offer;
   }
 
   @Get()

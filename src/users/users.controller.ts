@@ -27,7 +27,20 @@ export class UsersController {
   ) {}
 
   @Get('me')
-  me(@GetReqParam('user') user: User) {
+  async me(@GetReqParam('user') user: User) {
+    if (!user)
+      throw new NotFoundException('Что-то пошло не так. Авторизуйтесь.');
+
+    console.log(
+      (
+        await this.wishesService.factory('findOneWithOptions', [
+          1,
+          { relations: ['offers'] },
+        ])
+      ).value,
+      (await this.wishesService.factory('findByUserId', [user.id])).value,
+    );
+
     return user;
   }
 

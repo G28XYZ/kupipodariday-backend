@@ -19,8 +19,12 @@ export class WishesService {
     return plainToInstance(Wish, wish);
   }
 
+  saveWish(wish: Partial<Wish>) {
+    return this.wishRepository.save(this._genWish(wish));
+  }
+
   create(createWishDto: CreateWishDto) {
-    return this.wishRepository.save(this._genWish(createWishDto));
+    return this.saveWish(createWishDto);
   }
 
   findLast40() {
@@ -41,7 +45,7 @@ export class WishesService {
   findOneById(id: number) {
     return this.wishRepository.findOneBy({ id });
   }
-
+  /** поиск по id с возможностью передать опции */
   findOneWithOptions(id: number, options?: FindOneOptions<Wish>) {
     return this.wishRepository.findOne({ where: { id }, ...options });
   }
@@ -55,5 +59,20 @@ export class WishesService {
       throw new BadRequestException('Нельзя скопировать свой подарок');
     ++wish.copied;
     return await this.wishRepository.save(wish);
+  }
+
+  async factory<
+    K extends keyof Omit<WishesService, 'wishRepository' | 'factory'>,
+  >(method: K, args: Parameters<WishesService[K]>) {
+    let value = {};
+    if (method in this) {
+      const fn: Function = this?.[method].bind(this, ...args);
+      if (typeof fn === 'function') {
+        value = await fn();
+      }
+      return Object.assign(this, { value }) as typeof this & {
+        value?: ReturnType<WishesService[K]>;
+      };
+    }
   }
 }
