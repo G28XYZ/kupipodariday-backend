@@ -9,11 +9,30 @@ import { Wish } from './entities/wish.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 
+class FactoryModel {
+  #value: any;
+
+  async factory<T extends this & Record<string, any>, K extends keyof this>(
+    method: K,
+    args?: Parameters<T[K]>,
+  ) {
+    if (method in this) {
+      const fn = this[method] as (args: Parameters<T[K]>) => ReturnType<T[K]>;
+      if (typeof fn === 'function') {
+        this.#value = await fn.bind(this)(...args);
+      }
+      return Object.assign(this, { value: this.#value as ReturnType<T[K]> });
+    }
+  }
+}
+
 @Injectable()
-export class WishesService {
+export class WishesService extends FactoryModel {
   constructor(
     @InjectRepository(Wish) private readonly wishRepository: Repository<Wish>,
-  ) {}
+  ) {
+    super();
+  }
 
   private _genWish(wish: Partial<Wish>) {
     return plainToInstance(Wish, wish);
@@ -61,18 +80,18 @@ export class WishesService {
     return await this.wishRepository.save(wish);
   }
 
-  async factory<
-    K extends keyof Omit<WishesService, 'wishRepository' | 'factory'>,
-  >(method: K, args: Parameters<WishesService[K]>) {
-    let value = {};
-    if (method in this) {
-      const fn: Function = this?.[method].bind(this, ...args);
-      if (typeof fn === 'function') {
-        value = await fn();
-      }
-      return Object.assign(this, { value }) as typeof this & {
-        value?: ReturnType<WishesService[K]>;
-      };
-    }
-  }
+  // async factory<
+  //   K extends keyof Omit<WishesService, 'wishRepository' | 'factory'>,
+  // >(method: K, args: Parameters<WishesService[K]>) {
+  //   let value = {};
+  //   if (method in this) {
+  //     const fn: Function = this?.[method].bind(this, ...args);
+  //     if (typeof fn === 'function') {
+  //       value = await fn();
+  //     }
+  //     return Object.assign(this, { value }) as typeof this & {
+  //       value?: ReturnType<WishesService[K]>;
+  //     };
+  //   }
+  // }
 }
