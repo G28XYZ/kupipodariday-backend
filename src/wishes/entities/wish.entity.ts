@@ -2,7 +2,14 @@ import { IsUrl, Length, Min } from 'class-validator';
 import { PrimaryEntityFields } from 'src/common/primary-entity-fields';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
-import { BeforeUpdate, Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 // TODO - перенести числа и текст в константы
 
@@ -35,12 +42,13 @@ export class Wish extends PrimaryEntityFields {
   @Length(1, 1024)
   description: string;
   /** offers — массив ссылок на заявки скинуться от других пользователей. */
-  @OneToMany(() => Offer, (offer) => offer.item, { cascade: true })
+  @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[];
   /** copied — содержит cчётчик тех, кто скопировал подарок себе. Целое десятичное число. */
   @Column({ default: 0 })
   copied: number;
   /**  */
+  @BeforeInsert()
   @BeforeUpdate()
   private _sumOffers() {
     if (this.offers?.length) {

@@ -12,17 +12,42 @@ import { plainToInstance } from 'class-transformer';
 class FactoryModel {
   #value: any;
 
-  async factory<T extends this & Record<string, any>, K extends keyof this>(
+  factory<T extends this & Record<string, any>, K extends keyof this>(
     method: K,
-    args?: Parameters<T[K]>,
-  ) {
-    if (method in this) {
-      const fn = this[method] as (args: Parameters<T[K]>) => ReturnType<T[K]>;
-      if (typeof fn === 'function') {
-        this.#value = await fn.bind(this)(...args);
-      }
-      return Object.assign(this, { value: this.#value as ReturnType<T[K]> });
+    args?: Parameters<T[K]> | 'apply_value',
+  ): typeof this & { value?: ReturnType<T[K]> };
+
+  factory<
+    T extends this & Record<string, any>,
+    K extends keyof this,
+    F extends (value?: ReturnType<T[K]>, service?: this) => any,
+  >(
+    adapter: F,
+    args?: Parameters<T[K]> | 'apply_value',
+  ): typeof this & { value?: ReturnType<T[K]> };
+
+  factory<
+    T extends this & Record<string, any>,
+    K extends keyof this,
+    F extends (value?: ReturnType<T[K]>, service?: this) => any,
+  >(method: K | F, args?: Parameters<T[K]> | 'apply_value') {
+    const applyValueAsync = async (fn: F) =>
+      (this.#value = await fn.bind(this)(await this.#value));
+
+    if (typeof method === 'function') {
+      const adapter = method;
+      adapter(this.#value as ReturnType<T[K]>, this);
     }
+    if (typeof method === 'string' && method in this) {
+      const fn = this[method] as F;
+      if (typeof fn === 'function') {
+        if (args === 'apply_value') applyValueAsync(fn);
+        else this.#value = fn.bind(this)?.(...args);
+      }
+    }
+    return Object.assign(this, {
+      value: this.#value as ReturnType<T[K]>,
+    });
   }
 }
 

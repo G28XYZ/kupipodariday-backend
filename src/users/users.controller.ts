@@ -27,19 +27,17 @@ export class UsersController {
   ) {}
 
   @Get('me')
-  async me(@GetReqParam('user') user: User) {
+  me(@GetReqParam('user') user: User) {
     if (!user)
       throw new NotFoundException('Что-то пошло не так. Авторизуйтесь.');
 
-    console.log(
-      (
-        await this.wishesService.factory('findOneWithOptions', [
-          1,
-          { relations: ['offers'] },
-        ])
-      ).value,
-      (await this.wishesService.factory('findByUserId', [user.id])).value,
-    );
+    this.wishesService
+      .factory('findOneWithOptions', [1, { relations: ['offers'] }])
+      .factory(async (_, service) => {
+        const wish = await service.value;
+        wish.raised = wish.offers.reduce((sum, cur) => sum + cur.amount, 0);
+        service.saveWish(wish);
+      });
 
     return user;
   }
