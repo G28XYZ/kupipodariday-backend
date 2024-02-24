@@ -1,19 +1,19 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   NotFoundException,
+  Get,
+  Param,
+  ParseIntPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { OffersService } from './offers.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
-import { UpdateOfferDto } from './dto/update-offer.dto';
 import { GetReqParam } from 'src/utils/get-req-param';
 import { User } from 'src/users/entities/user.entity';
 import { WishesService } from 'src/wishes/wishes.service';
+import { ERROR_MESSAGES } from 'src/utils/constants';
 
 @Controller('offers')
 export class OffersController {
@@ -27,42 +27,37 @@ export class OffersController {
     @GetReqParam('user') user: User,
     @Body() createOfferDto: CreateOfferDto,
   ) {
-    const item = await this.wishesService.findOneById(createOfferDto.itemId);
-    if (!item) throw new NotFoundException('Подарок не найден');
+    const wishItem = await this.wishesService.findOneById(
+      createOfferDto.itemId,
+    );
+    if (!wishItem) throw new NotFoundException(ERROR_MESSAGES.WISH.NOT_FOUND);
+    if (wishItem.price <= parseInt(wishItem.raised?.toString(), 10))
+      throw new BadRequestException(ERROR_MESSAGES.OFFER.IS_COMPLETE);
+    if (
+      createOfferDto.amount >
+      wishItem.price - parseInt(wishItem.raised?.toString(), 10)
+    )
+      throw new BadRequestException(ERROR_MESSAGES.OFFER.MUCH_PRICE);
 
-    const offer = await this.offersService.create({
+    await this.offersService.create({
       ...createOfferDto,
       user,
-      item,
+      item: wishItem,
     });
 
-    // console.log(
-    //   this.wishesService.factory('findOneWithOptions', [
-    //     item.id,
-    //     { relations: ['offers'] },
-    //   ]).value,
-    // );
+    wishItem.raised =
+      (parseInt(wishItem.raised?.toString(), 10) || 0) + createOfferDto.amount;
+    await this.wishesService.saveWish(wishItem);
+    return {};
+  }
 
-    return offer;
+  @Get(':id')
+  findById(@Param('id', ParseIntPipe) id: number) {
+    return this.offersService.findById(id);
   }
 
   @Get()
   findAll() {
     return this.offersService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.offersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOfferDto: UpdateOfferDto) {
-    return this.offersService.update(+id, updateOfferDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.offersService.remove(+id);
   }
 }

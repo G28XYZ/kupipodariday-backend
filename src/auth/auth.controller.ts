@@ -2,13 +2,15 @@ import {
   Controller,
   Post,
   Body,
-  HttpCode,
-  BadRequestException,
+  ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { ERROR_MESSAGES } from 'src/utils/constants';
+import { compare } from 'bcrypt';
 
 @Controller()
 export class AuthController {
@@ -18,17 +20,34 @@ export class AuthController {
   ) {}
 
   @Post('signup')
-  @HttpCode(201) // TODO - const
   async signUp(@Body() createUserDto: CreateUserDto) {
-    if (await this.userService.findByName(createUserDto.username)) {
-      throw new BadRequestException('Пользователь с таким именем существует'); // TODO - const
+    const user = await this.userService.findByNameOrEmail(
+      createUserDto.username,
+      createUserDto.email,
+    );
+    if (user) {
+      if (
+        user.username === createUserDto.username ||
+        user.email === createUserDto.email
+      )
+        throw new ConflictException(ERROR_MESSAGES.USER.EXISTS);
     }
     return this.authService.register(createUserDto);
   }
 
-  @HttpCode(200) // TODO - const
   @Post('signin')
-  async signIn(@Body() body: LoginUserDto) {
-    return this.authService.login(body);
+  async signIn(@Body() { username, password }: LoginUserDto) {
+    const user = await this.userService.findOneWithSelect(username, [
+      'password',
+      'id',
+    ]);
+    if (!user) {
+      throw new UnauthorizedException(ERROR_MESSAGES.USER.NOT_FOUND);
+    }
+    const isComparePassword = await compare(password, user.password);
+    if (isComparePassword === false) {
+      throw new UnauthorizedException(ERROR_MESSAGES.USER.NOT_CORRECT);
+    }
+    return this.authService.login(user.id);
   }
 }

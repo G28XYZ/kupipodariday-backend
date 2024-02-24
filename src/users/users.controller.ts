@@ -4,18 +4,19 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
-  ParseIntPipe,
   UseGuards,
   Query,
   Post,
   NotFoundException,
+  ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
 import { GetReqParam } from 'src/utils/get-req-param';
+import { ERROR_MESSAGES } from 'src/utils/constants';
 import { WishesService } from 'src/wishes/wishes.service';
 
 @Controller('users')
@@ -23,22 +24,12 @@ import { WishesService } from 'src/wishes/wishes.service';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly wishesService: WishesService,
+    private readonly wishService: WishesService,
   ) {}
 
   @Get('me')
-  me(@GetReqParam('user') user: User) {
-    if (!user)
-      throw new NotFoundException('Что-то пошло не так. Авторизуйтесь.');
-
-    this.wishesService
-      .factory('findOneWithOptions', [1, { relations: ['offers'] }])
-      .factory(async (_, service) => {
-        const wish = await service.value;
-        wish.raised = wish.offers.reduce((sum, cur) => sum + cur.amount, 0);
-        service.saveWish(wish);
-      });
-
+  async me(@GetReqParam('user') user: User) {
+    if (!user) throw new NotFoundException(ERROR_MESSAGES.AUTH.NOT_AUTH);
     return user;
   }
 
@@ -48,12 +39,12 @@ export class UsersController {
     @GetReqParam('user', 'id') id: number,
   ) {
     const userId =
-      name === 'me' ? id : (await this.usersService.findByName(name)).id;
+      name === 'me' ? id : (await this.usersService.findByNameOrEmail(name)).id;
     const user = await this.usersService.findWishes(userId);
     if (user.wishes) {
       return user.wishes;
     }
-    throw new NotFoundException('Подарки не найдены');
+    throw new NotFoundException(ERROR_MESSAGES.WISH.EMPTY);
   }
 
   @Get('find')
@@ -67,24 +58,32 @@ export class UsersController {
   }
 
   @Get(':username')
-  findOne(@Param('username') username: string) {
-    return this.usersService.findByName(username);
+  async findOne(@Param('username') username: string) {
+    const user = await this.usersService.findByNameOrEmail(username);
+    if (!user) throw new BadRequestException(ERROR_MESSAGES.USER.NOT_FOUND);
+    return user;
   }
 
   @Patch('me')
   async update(
-    @GetReqParam('user', 'id') id: number,
+    @GetReqParam('user') user: User,
     @Body() userData: UpdateUserDto,
   ) {
-    if (!id?.toString()) throw new NotFoundException();
-    return this.usersService.updateOne(id, userData);
-  }
+    if (!user) throw new NotFoundException(ERROR_MESSAGES.USER.NOT_FOUND);
 
-  @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    const user = await this.usersService.findById(id);
-    if (!user) throw new NotFoundException();
-    return this.usersService.removeOne(id);
+    const findUser = await this.usersService.findByNameOrEmail(
+      userData.username,
+      userData.email,
+    );
+    if (findUser.id !== user.id) {
+      if (findUser.username === userData.username)
+        throw new ConflictException(ERROR_MESSAGES.USER.EXISTS_NAME);
+
+      if (findUser.email === userData.email)
+        throw new ConflictException(ERROR_MESSAGES.USER.EXISTS_EMAIL);
+    }
+
+    return this.usersService.updateOne(user.id, userData);
   }
 
   @Post('find')

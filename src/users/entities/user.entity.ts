@@ -10,6 +10,8 @@ import {
 } from 'class-validator';
 import { PrimaryEntityFields } from 'src/common/primary-entity-fields';
 import { Offer } from 'src/offers/entities/offer.entity';
+import { DEFAULT_VALUES, ERROR_MESSAGES } from 'src/utils/constants';
+import { stringFormat } from 'src/utils/string-format';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 import {
@@ -29,28 +31,50 @@ import {
 export class User extends PrimaryEntityFields {
   /** имя пользователя, уникальная строка от 2 до 30 символов, обязательное поле. */
   @Column({ unique: true })
-  @Length(2, 30)
+  @Length(2, 30, {
+    message: JSON.stringify({
+      username: stringFormat(ERROR_MESSAGES.VALIDATION.TEXT_LENGTH, 2, 30),
+    }),
+  })
   username: string;
   /** about — **информация о пользователе, строка от 2 до 200 символов. В качестве значения по умолчанию укажите для него строку: «Пока ничего не рассказал о себе». */
   @ValidateIf((s) => Boolean(s?.length))
-  @Column({ default: 'Пока ничего не рассказал о себе' })
-  @Length(2, 200)
+  @Column({ default: DEFAULT_VALUES.USER.ABOUT })
+  @Length(2, 200, {
+    message: JSON.stringify({
+      about: stringFormat(ERROR_MESSAGES.VALIDATION.TEXT_LENGTH, 2, 200),
+    }),
+  })
   @IsOptional()
   about?: string;
   /** avatar — ссылка на аватар. В качестве значения по умолчанию задайте https://i.pravatar.cc/300 */
-  @Column({ default: 'https://i.pravatar.cc/300' })
-  @IsUrl()
+  @Column({ default: DEFAULT_VALUES.USER.AVATAR })
+  @IsUrl(undefined, {
+    message: JSON.stringify({
+      avatar: stringFormat(ERROR_MESSAGES.VALIDATION.IS_URL, 'для аватар'),
+    }),
+  })
   @IsOptional()
   avatar?: string;
   /** email — адрес электронной почты пользователя, должен быть уникален. */
   @Column({ unique: true })
-  @IsEmail()
-  @IsNotEmpty()
+  @IsEmail(undefined, {
+    message: JSON.stringify({ email: ERROR_MESSAGES.VALIDATION.IS_EMAIL }),
+  })
+  @IsNotEmpty({
+    message: JSON.stringify({ email: ERROR_MESSAGES.VALIDATION.NOT_EMPTY }),
+  })
   email: string;
   /** password — пароль пользователя, строка. */
   @Column({ select: false })
-  @IsNotEmpty()
-  @MinLength(5)
+  @IsNotEmpty({
+    message: JSON.stringify({ password: ERROR_MESSAGES.VALIDATION.NOT_EMPTY }),
+  })
+  @MinLength(6, {
+    message: JSON.stringify({
+      password: ERROR_MESSAGES.VALIDATION.MIN_LENGTH_PASS,
+    }),
+  })
   password: string;
   /** wishes — список желаемых подарков. Используйте для него соответствующий тип связи. */
   @OneToMany(() => Wish, (wish) => wish.owner)

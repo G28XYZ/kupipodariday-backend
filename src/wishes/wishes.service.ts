@@ -1,91 +1,64 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './entities/wish.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
-
-class FactoryModel {
-  #value: any;
-
-  factory<T extends this & Record<string, any>, K extends keyof this>(
-    method: K,
-    args?: Parameters<T[K]> | 'apply_value',
-  ): typeof this & { value?: ReturnType<T[K]> };
-
-  factory<
-    T extends this & Record<string, any>,
-    K extends keyof this,
-    F extends (value?: ReturnType<T[K]>, service?: this) => any,
-  >(
-    adapter: F,
-    args?: Parameters<T[K]> | 'apply_value',
-  ): typeof this & { value?: ReturnType<T[K]> };
-
-  factory<
-    T extends this & Record<string, any>,
-    K extends keyof this,
-    F extends (value?: ReturnType<T[K]>, service?: this) => any,
-  >(method: K | F, args?: Parameters<T[K]> | 'apply_value') {
-    const applyValueAsync = async (fn: F) =>
-      (this.#value = await fn.bind(this)(await this.#value));
-
-    if (typeof method === 'function') {
-      const adapter = method;
-      adapter(this.#value as ReturnType<T[K]>, this);
-    }
-    if (typeof method === 'string' && method in this) {
-      const fn = this[method] as F;
-      if (typeof fn === 'function') {
-        if (args === 'apply_value') applyValueAsync(fn);
-        else this.#value = fn.bind(this)?.(...args);
-      }
-    }
-    return Object.assign(this, {
-      value: this.#value as ReturnType<T[K]>,
-    });
-  }
-}
+import { User } from 'src/users/entities/user.entity';
+import { UpdateWishDto } from './dto/update-wish.dto';
 
 @Injectable()
-export class WishesService extends FactoryModel {
+export class WishesService {
   constructor(
     @InjectRepository(Wish) private readonly wishRepository: Repository<Wish>,
-  ) {
-    super();
-  }
-
+  ) {}
+  /**
+   * создать модель данных подарка
+   * @param wish данные о подарке
+   */
   private _genWish(wish: Partial<Wish>) {
     return plainToInstance(Wish, wish);
   }
-
+  /**
+   * сохранить данные о подарке
+   * @param wish данные о подарке
+   */
   saveWish(wish: Partial<Wish>) {
     return this.wishRepository.save(this._genWish(wish));
   }
-
+  /**
+   * создать подарок
+   * @param createWishDto данные о подарке
+   */
   create(createWishDto: CreateWishDto) {
     return this.saveWish(createWishDto);
   }
-
+  /**
+   * найти крайние 40 подарков
+   */
   findLast40() {
     return this.wishRepository.find({ take: 40 });
   }
-
-  findTop20() {
-    return this.wishRepository.find({ order: { copied: 'DESC' }, take: 20 });
+  /**
+   * найти 10 лучших подарков
+   */
+  findTop10() {
+    return this.wishRepository.find({ order: { copied: 'DESC' }, take: 10 });
   }
-
-  findByUserId(id: number) {
+  /**
+   * поиск подарка по уникальному идентификатору пользователя
+   * @param userId уникальный идентификатор пользователя
+   */
+  findByUserId(userId: number) {
     return this.wishRepository.find({
-      where: { owner: { id } },
+      where: { owner: { id: userId } },
       relations: ['owner'],
     });
   }
-
+  /**
+   * поиск подарка по уникальному идентификатору
+   * @param id уникальный идентификатор подарка
+   */
   findOneById(id: number) {
     return this.wishRepository.findOneBy({ id });
   }
@@ -93,30 +66,31 @@ export class WishesService extends FactoryModel {
   findOneWithOptions(id: number, options?: FindOneOptions<Wish>) {
     return this.wishRepository.findOne({ where: { id }, ...options });
   }
-
-  async findCopingWish(userId: number, wishId: number) {
-    const wish = await this.findOneWithOptions(wishId, {
-      relations: ['owner'],
-    });
-    if (!wish.owner.id) throw new NotFoundException('Подарок не найден');
-    if (wish.owner.id === userId)
-      throw new BadRequestException('Нельзя скопировать свой подарок');
+  /**
+   * скопировать подарок
+   * @param wish данные о подарке
+   * @param user данные о пользователе
+   */
+  async copyWish(wish: Wish, user: User) {
     ++wish.copied;
-    return await this.wishRepository.save(wish);
+    await this.saveWish(wish);
+    delete wish.id;
+    return await this.saveWish({ ...wish, owner: user, copied: 0 });
   }
-
-  // async factory<
-  //   K extends keyof Omit<WishesService, 'wishRepository' | 'factory'>,
-  // >(method: K, args: Parameters<WishesService[K]>) {
-  //   let value = {};
-  //   if (method in this) {
-  //     const fn: Function = this?.[method].bind(this, ...args);
-  //     if (typeof fn === 'function') {
-  //       value = await fn();
-  //     }
-  //     return Object.assign(this, { value }) as typeof this & {
-  //       value?: ReturnType<WishesService[K]>;
-  //     };
-  //   }
-  // }
+  /**
+   * удалить подарок
+   * @param id уникальный идентификатор подарка
+   */
+  removeById(id: number) {
+    return this.wishRepository.delete({ id });
+  }
+  /**
+   * обновить данные о подарке
+   * @param id - уникальный идентификатор подарка
+   * @param updateWishDto - обновляемые данные о подарке
+   */
+  updateById(id: number, updateWishDto: UpdateWishDto) {
+    this.wishRepository.update({ id }, updateWishDto);
+    return {};
+  }
 }

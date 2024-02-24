@@ -1,9 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
-import { compare } from 'bcrypt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
 import { ConfigurationService } from 'src/config';
 
 @Injectable()
@@ -13,34 +11,31 @@ export class AuthService {
     private readonly configService: ConfigurationService,
     private readonly jwtService: JwtService,
   ) {}
-
+  /**
+   * регистрация нового пользователя
+   * @param createUserDto данные о новом пользователе
+   */
   async register(createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
     return await this.generateToken(user.id);
   }
-
-  async generateToken(userId: number) {
+  /**
+   * сгенерировать токен
+   * @param id уникальный идентификатор пользователя
+   */
+  async generateToken(id: number) {
     return {
       access_token: await this.jwtService.signAsync(
-        { id: userId },
-        { secret: this.configService.get('jwtSecret') },
+        { id },
+        { secret: this.configService.get('jwtSecret'), expiresIn: '1d' },
       ),
     };
   }
-
-  async login({ username, password }: LoginUserDto) {
-    const user = await this.userService.findOneWithSelect(username, [
-      'password',
-      'id',
-    ]);
-    console.log(user);
-    if (!user) {
-      throw new UnauthorizedException('NOT_FOUND_ERROR'); // TODO - const err
-    }
-    const isComparePassword = await compare(password, user.password);
-    if (isComparePassword === false) {
-      throw new UnauthorizedException('PASSWORD_ERROR'); // TODO - const err
-    }
-    return await this.generateToken(user.id);
+  /**
+   * авторизация пользователя
+   * @param id уникальный идентификатор пользователя
+   */
+  async login(id: number) {
+    return await this.generateToken(id);
   }
 }
