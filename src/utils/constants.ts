@@ -46,3 +46,9 @@ export const DEFAULT_VALUES = {
     AVATAR: 'https://i.pravatar.cc/300',
   },
 } as const;
+
+export const NAME_LOCAL_AUTH_GUARD = 'LOCAL_AUTH_GUARD';
+
+export const NAME_JWT_AUTH_GUARD = 'JWT_AUTH_GUARD';
+
+export const IS_PUBLIC_KEY = 'isPublic';

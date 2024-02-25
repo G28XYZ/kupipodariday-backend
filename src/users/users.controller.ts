@@ -4,7 +4,6 @@ import {
   Body,
   Patch,
   Param,
-  UseGuards,
   Query,
   Post,
   NotFoundException,
@@ -13,24 +12,18 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
 import { GetReqParam } from 'src/utils/get-req-param';
 import { ERROR_MESSAGES } from 'src/utils/constants';
-import { WishesService } from 'src/wishes/wishes.service';
 
 @Controller('users')
-@UseGuards(AuthGuard)
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly wishService: WishesService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  async me(@GetReqParam('user') user: User) {
+  me(@GetReqParam('user') user: User) {
     if (!user) throw new NotFoundException(ERROR_MESSAGES.AUTH.NOT_AUTH);
-    return user;
+    return this.usersService.findById(user.id);
   }
 
   @Get(':username/wishes')

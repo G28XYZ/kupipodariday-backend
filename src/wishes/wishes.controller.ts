@@ -16,6 +16,7 @@ import { GetReqParam } from 'src/utils/get-req-param';
 import { User } from 'src/users/entities/user.entity';
 import { ERROR_MESSAGES } from 'src/utils/constants';
 import { UpdateWishDto } from './dto/update-wish.dto';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('wishes')
 export class WishesController {
@@ -46,11 +47,13 @@ export class WishesController {
     return {};
   }
 
+  @Public()
   @Get('last')
   findLast() {
     return this.wishesService.findLast40();
   }
 
+  @Public()
   @Get('top')
   findTop() {
     return this.wishesService.findTop10();

@@ -4,17 +4,17 @@ export const HandelLogger = (
 ) => {
   let { message = '' } = options;
   const { logArgs = 'dev' === process?.env?.NODE_ENV } = options;
-  return (
-    target: Record<string, any>,
-    name: string,
-    description: PropertyDescriptor,
-  ) => {
+  return (_, name: string, description: PropertyDescriptor) => {
     const originalFn = description.value;
     message = `[${title || 'HandleLogger'}] -  ${name}${
       message && ' : ' + message
     }`;
     description.value = function (...args: any[]) {
-      logArgs && (message += ` [args]:${JSON.stringify(args)}`);
+      logArgs &&
+        (message += ` [args]:${JSON.stringify(args).replace(
+          /"password":".*?[^"]",?/,
+          '',
+        )}`);
       this.logger.log({
         level: 'info',
         message,

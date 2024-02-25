@@ -1,8 +1,7 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
-import { AppController } from './app.controller';
 import { UsersModule } from './users/users.module';
 import { WishesModule } from './wishes/wishes.module';
 import { WishlistsModule } from './wishlists/wishlists.module';
@@ -10,12 +9,12 @@ import { OffersModule } from './offers/offers.module';
 import { AuthModule } from './auth/auth.module';
 
 import configuration, { ConfigurationService, ormConfig } from './config';
-import { AuthMiddleware } from './auth/middlewares/auth-middleware';
 import { JwtService } from '@nestjs/jwt';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guards/jwt.guard';
 
 @Module({
   imports: [
@@ -36,6 +35,11 @@ import { APP_GUARD } from '@nestjs/core';
       transports: [
         new winston.transports.Console({ format: winston.format.simple() }),
         new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        process.env.NODE_ENV === 'dev' &&
+          new winston.transports.File({
+            filename: 'debug.log',
+            level: 'info',
+          }),
       ],
     }),
     ThrottlerModule.forRoot([{ ttl: 60, limit: 10 }]),
@@ -46,18 +50,12 @@ import { APP_GUARD } from '@nestjs/core';
     OffersModule,
     AuthModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
     JwtService,
     ConfigurationService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
 })
-export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes({
-      path: '*',
-      method: RequestMethod.ALL,
-    });
-  }
-}
+export class AppModule {}

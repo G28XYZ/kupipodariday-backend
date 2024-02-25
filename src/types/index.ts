@@ -3,13 +3,7 @@ import { User } from 'src/users/entities/user.entity';
 
 export type TConfiguration = {
   jwtSecret: string;
-  database: {
-    type: string;
-    host: string;
-    port: number;
-    username: string;
-    database: string;
-  };
+  jwtExpire: string;
 };
 
 export type TSessionRequest = { user: User };
