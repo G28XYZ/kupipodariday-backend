@@ -16,15 +16,20 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt.guard';
 
-@Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [ormConfig, configuration],
-      expandVariables: true,
-      envFilePath: `${process.env.NODE_ENV ?? ''}.env`,
-    }),
-    WinstonModule.forRoot({
+const winstonFactory = {
+  async useFactory() {
+    const transports = [
+      new winston.transports.Console({ format: winston.format.simple() }),
+      new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    ];
+    process.env.NODE_ENV === 'dev' &&
+      transports.push(
+        new winston.transports.File({
+          filename: 'debug.log',
+          level: 'info',
+        }),
+      );
+    return {
       levels: {
         critical_error: 0,
         error: 1,
@@ -32,16 +37,20 @@ import { JwtAuthGuard } from './auth/guards/jwt.guard';
         another_log_level: 3,
         info: 4,
       },
-      transports: [
-        new winston.transports.Console({ format: winston.format.simple() }),
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
-        process.env.NODE_ENV === 'dev' &&
-          new winston.transports.File({
-            filename: 'debug.log',
-            level: 'info',
-          }),
-      ],
+      transports,
+    };
+  },
+};
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [ormConfig, configuration],
+      expandVariables: true,
+      envFilePath: `${process.env.NODE_ENV ?? 'prod'}.env`,
     }),
+    WinstonModule.forRootAsync(winstonFactory),
     ThrottlerModule.forRoot([{ ttl: 60, limit: 10 }]),
     TypeOrmModule.forRootAsync({ useFactory: ormConfig }),
     UsersModule,

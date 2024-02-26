@@ -6,7 +6,7 @@ import { User } from 'src/users/entities/user.entity';
 import { NAME_JWT_AUTH_GUARD } from 'src/utils/constants';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(
+export class JwtAuthStrategy extends PassportStrategy(
   Strategy,
   NAME_JWT_AUTH_GUARD,
 ) {

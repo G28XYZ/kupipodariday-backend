@@ -68,7 +68,8 @@ export class UsersController {
       userData.username,
       userData.email,
     );
-    if (findUser.id !== user.id) {
+
+    if (findUser && findUser.id !== user.id) {
       if (findUser.username === userData.username)
         throw new ConflictException(ERROR_MESSAGES.USER.EXISTS_NAME);
 

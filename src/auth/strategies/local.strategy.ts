@@ -6,7 +6,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ERROR_MESSAGES, NAME_LOCAL_AUTH_GUARD } from 'src/utils/constants';
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(
+export class LocalAuthStrategy extends PassportStrategy(
   Strategy,
   NAME_LOCAL_AUTH_GUARD,
 ) {

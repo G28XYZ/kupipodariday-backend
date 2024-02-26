@@ -75,7 +75,7 @@ export class WishesService {
     ++wish.copied;
     await this.saveWish(wish);
     delete wish.id;
-    return await this.saveWish({ ...wish, owner: user, copied: 0 });
+    return await this.saveWish({ ...wish, owner: user, copied: 0, raised: 0 });
   }
   /**
    * удалить подарок

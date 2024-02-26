@@ -5,7 +5,7 @@ import { Offer } from './entities/offer.entity';
 import { Repository } from 'typeorm';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { HandelLogger } from 'src/utils/handle-logger';
+import { HandleLogger } from 'src/utils/handle-logger';
 
 @Injectable()
 export class OffersService {
@@ -18,7 +18,7 @@ export class OffersService {
    * создать желающего скинуться на подарок
    * @param createOfferDto - данные желающего скинуться на подарок
    */
-  @HandelLogger('OffersService')
+  @HandleLogger('OffersService')
   create(createOfferDto: CreateOfferDto & Pick<Offer, 'item' | 'user'>) {
     return this.offerRepository.save(createOfferDto);
   }
@@ -26,14 +26,14 @@ export class OffersService {
    * поиск желающего скинуться на подарок по уникальному идентификатору
    * @param id - уникальный идентификатор желающего скинуться на подарок
    */
-  @HandelLogger('OffersService')
+  @HandleLogger('OffersService')
   findById(id: number) {
     return this.offerRepository.findBy({ id });
   }
   /**
    * поиск всех желающих скинуться на подарок
    */
-  @HandelLogger('OffersService')
+  @HandleLogger('OffersService')
   findAll() {
     return this.offerRepository.find();
   }

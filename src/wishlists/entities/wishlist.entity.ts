@@ -5,8 +5,6 @@ import { stringFormat } from 'src/utils/string-format';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 
-// TODO - перенести числа и текст в константы
-
 /** Cхема списка подарков (wishlist): */
 @Entity()
 export class Wishlist extends PrimaryEntityFields {

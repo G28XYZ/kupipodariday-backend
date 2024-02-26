@@ -7,8 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { ConfigurationService } from 'src/config';
 import { BcryptService } from 'src/helpers/bcrypt.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { LocalStrategy } from './strategies/local.strategy';
+import { JwtAuthStrategy } from './strategies/jwt.strategy';
+import { LocalAuthStrategy } from './strategies/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 
@@ -35,8 +35,8 @@ const jwtFactory = {
     JwtService,
     ConfigurationService,
     BcryptService,
-    JwtStrategy,
-    LocalStrategy,
+    JwtAuthStrategy,
+    LocalAuthStrategy,
   ],
 })
 export class AuthModule {}

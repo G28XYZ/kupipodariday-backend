@@ -1,7 +1,7 @@
 {
   "name": "kupipodariday-backend",
   "version": "0.0.1",
-  "description": "",
+  "description": "API для сервиса вишлистов КупиПодариДай",
   "author": "Aleksandr Kucherenko",
   "private": true,
   "license": "UNLICENSED",
@@ -9,7 +9,7 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "NODE_ENV=dev nest start",
+    "start": "nest start",
     "start:dev": "NODE_ENV=dev nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "NODE_ENV=prod node dist/main",
@@ -80,7 +80,8 @@
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "4.0.0",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "win-node-env": "^0.6.1"
   },
   "jest": {
     "moduleFileExtensions": [

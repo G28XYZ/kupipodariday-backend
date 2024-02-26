@@ -1,4 +1,3 @@
-import { genSalt, hash } from 'bcrypt';
 import {
   IsEmail,
   IsNotEmpty,
@@ -9,6 +8,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { PrimaryEntityFields } from 'src/common/primary-entity-fields';
+import { BcryptService } from 'src/helpers/bcrypt.service';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { DEFAULT_VALUES, ERROR_MESSAGES } from 'src/utils/constants';
 import { stringFormat } from 'src/utils/string-format';
@@ -91,7 +91,7 @@ export class User extends PrimaryEntityFields {
   @BeforeUpdate()
   private async _handleHashPassword() {
     if (this.password) {
-      this.password = await hash(this.password, await genSalt(10));
+      this.password = await new BcryptService().genHashPass(this.password);
     }
   }
 }
