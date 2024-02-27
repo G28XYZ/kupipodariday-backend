@@ -8,6 +8,7 @@ import {
   Patch,
   Delete,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { WishlistsService } from './wishlists.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
@@ -17,8 +18,10 @@ import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { WishesService } from 'src/wishes/wishes.service';
 import { ERROR_MESSAGES } from 'src/utils/constants';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller(['wishlistlists', 'wishlists'])
+@UseGuards(JwtAuthGuard)
 export class WishlistsController {
   constructor(
     private readonly wishlistsService: WishlistsService,

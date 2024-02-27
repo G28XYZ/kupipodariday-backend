@@ -48,7 +48,7 @@ const winstonFactory = {
       isGlobal: true,
       load: [ormConfig, configuration],
       expandVariables: true,
-      envFilePath: `${process.env.NODE_ENV ?? 'prod'}.env`,
+      envFilePath: `${process.env.NODE_ENV || 'prod'}.env`,
     }),
     WinstonModule.forRootAsync(winstonFactory),
     ThrottlerModule.forRoot([{ ttl: 60, limit: 10 }]),

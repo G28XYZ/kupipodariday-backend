@@ -9,6 +9,7 @@ import {
   NotFoundException,
   BadRequestException,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
@@ -17,8 +18,10 @@ import { User } from 'src/users/entities/user.entity';
 import { ERROR_MESSAGES } from 'src/utils/constants';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('wishes')
+@UseGuards(JwtAuthGuard)
 export class WishesController {
   constructor(private readonly wishesService: WishesService) {}
 
