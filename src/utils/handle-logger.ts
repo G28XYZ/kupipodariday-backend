@@ -6,9 +6,7 @@ export const HandleLogger = (
   const { logArgs = 'dev' === process?.env?.NODE_ENV } = options;
   return (_, name: string, description: PropertyDescriptor) => {
     const originalFn = description.value;
-    const date = new Date().toLocaleString('ru-RU', {
-      timeZoneName: 'shortOffset',
-    });
+    const date = new Date();
     message = `${date}\n[${title || 'HandleLogger'}] -  ${name}${
       message && ' : ' + message
     }`;
